@@ -1,0 +1,26 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: ap-south-1
+    ECR_REPO: brain-tasks-app
+    IMAGE_TAG: latest
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon EKS...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION |
+        docker login --username AWS --password-stdin 959975881790.dkr.ecr.ap-south-1.amazonaws.com
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - docker build -t $ECR_REPO:$IMAGE_TAG ./dist
+      - docker tag $ECR_REPO:$IMAGE_TAG 959975881790.dkr.ecr.ap-south-1.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - echo Pushing Docker image to ECR...
+      - docker push 959975881790.dkr.ecr.ap-south-1.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+      - echo Build completed on `date`
